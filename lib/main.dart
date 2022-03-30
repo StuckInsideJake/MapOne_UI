@@ -1,37 +1,57 @@
 import 'dart:io';
-
+import 'package:syncfusion_flutter_datagrid_export/export.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
+import 'dart:html' as html;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:async_builder/async_builder.dart';
-import 'package:http_requests/http_requests.dart';
-import 'package:map_one_interface/backendCalls.dart';
 import 'package:map_one_interface/user.dart';
-import 'backendCalls.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'entry.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import "package:intl/intl.dart";
-
+import 'package:url_launcher_web/url_launcher_web.dart';
 import 'loginPage.dart';
 
+
+// Global variables and constants
 Icon SearchIcon = const Icon(Icons.search);
 Icon FaceIcon = const Icon(Icons.face);
 Icon HomeIcon = const Icon(Icons.home);
 Widget Bar = const Text(" MapOne ");
+
+List<String> logger = [];
+
+
 
 // setting list to a string then spliting it into a new list on the main to call
 // overflows for some reason
   // String entryIdArr = backEndCalls(entryIdArr) as String;
  //List EntryIdArr = entryIdArr.split(',');
 
-    Future<EntryDataGridSource> getEntryDataSource() async{
-      var entryList = await getApiEntries();
-      return EntryDataGridSource(entryList);
 
-    }
+final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
+
+
+    void downloadFile(String fileName, String content)
+           {
+            html.AnchorElement anchorElement =  new html.AnchorElement(href: fileName);
+
+            anchorElement.appendText(content);
+
+
+
+            anchorElement.download = fileName;
+
+            anchorElement.click();
+           }
+    Future<EntryDataGridSource> getEntryDataSource() async
+        {
+         var entryList = await getApiEntries();
+          return EntryDataGridSource(entryList);
+
+        }
     List<GridColumn> getColumns()
       {
         List<GridColumn> columns;
@@ -90,10 +110,11 @@ Widget Bar = const Text(" MapOne ");
                    overflow: TextOverflow.clip, softWrap: true )
            ),
          ),
-
        ];
        return columns;
       }
+
+    // Function: getApiEntries
     Future getApiEntries()
     async
     {
@@ -107,32 +128,40 @@ Widget Bar = const Text(" MapOne ");
           Entry.fromJson(json)).toList();
 
       return responseList;
-
     }
 
    class EntryDataGridSource extends DataGridSource
       {
+
         EntryDataGridSource(this.entryList)
          {
           buildDataGridRow();
          }
+
         late List<DataGridRow> dataGridRows;
         late List<Entry> entryList;
 
         @override
         DataGridRowAdapter? buildRow(DataGridRow row)
          {
+
+           logger.add(row.getCells()[1].value.toString());
+           logger.add(row.getCells()[2].value.toString());
+           logger.add(row.getCells()[3].value.toString());
+           logger.add(row.getCells()[4].value.toString());
+           logger.add(row.getCells()[5].value.toString());
+
            return DataGridRowAdapter(cells: [
              Container(
                child: Text(row.getCells()[0].value.toString(),
-               overflow: TextOverflow.ellipsis,
+               overflow: TextOverflow.visible,
                ),
                alignment: Alignment.center,
                padding: EdgeInsets.all(8.0),
              ),
              Container(
                child: Text(row.getCells()[1].value.toString(),
-                 overflow: TextOverflow.ellipsis,
+                 overflow: TextOverflow.visible,
                ),
                alignment: Alignment.center,
                padding: EdgeInsets.all(8.0),
@@ -159,14 +188,24 @@ Widget Bar = const Text(" MapOne ");
                padding: EdgeInsets.all(8.0),
              ),
              Container(
-               child: Text(row.getCells()[5].value.toString(),
-                 overflow: TextOverflow.visible,
-               ),
+               child: GestureDetector
+                (
+                 // allows text to
+                 onTap: ()=>html.window.open(row.getCells()[5].value.toString(), "new tab"),
+                 child: Text(row.getCells()[5].value.toString(),
+                  style: TextStyle(color: Colors.blueAccent),
+                  overflow: TextOverflow.visible,
+                ),
+                ),
                alignment: Alignment.center,
-               padding: EdgeInsets.all(8.0),
-             )
+
+               ),
+             // call in data logger here
            ] );
          }
+
+
+       // allows row access
        List<DataGridRow> get rows => dataGridRows;
 
        void buildDataGridRow()
@@ -198,9 +237,7 @@ class MapOne extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'MapOne',
-      theme: ThemeData( colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo)
-
-      ),
+      theme: ThemeData.dark(),
       home: MapOneHomePage(title:'MapOne Demo'),
     );
   }
@@ -229,6 +266,10 @@ class MapOneHomePage extends StatefulWidget {
   @override
   Widget build(BuildContext context)
      {
+       // allows selection of text data populated from the api
+      final DataGridController _dataGridController = DataGridController();
+
+
       return SafeArea(child:
 
         Scaffold( appBar:
@@ -285,19 +326,61 @@ class MapOneHomePage extends StatefulWidget {
                   });
                 }
             ),
-
           ],
 
         ),
-        // Publication Data
-        body: FutureBuilder(
-        future: getEntryDataSource(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
-          return snapshot.hasData
-              ? SfDataGrid(source: snapshot.data, columns: getColumns())
-              : Center(child: CircularProgressIndicator(strokeWidth: 3,) );
-        },
-      ),),);
-     }
 
+        body:
+        Row(mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+
+          Column(mainAxisAlignment: MainAxisAlignment.start,
+
+          children: [
+
+            ElevatedButton(
+              child: Text('Export all Publications to csv'),
+              onPressed: () {
+
+                // verify data is not null
+                if(logger!= null)
+                  {
+                    int length = logger.length, index = 0;
+
+                    String loopStr = '';
+
+
+                    while(index < length-1)
+                      {
+                        loopStr += logger.elementAt(index);
+                        index++;
+                      }
+
+                    if(loopStr != null)
+                      {
+                        downloadFile("mapone.csv", loopStr);
+                      }
+
+                  }
+
+              }),],),
+
+          Expanded( child: FittedBox(fit: BoxFit.contain,
+            child:  FutureBuilder(
+              future: getEntryDataSource(),
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
+                return snapshot.hasData
+                    ? SfDataGrid(key: key ,source: snapshot.data, columns: getColumns(),
+                  selectionMode: SelectionMode.single,
+                )
+                    : Center(child: CircularProgressIndicator(strokeWidth: 3,));
+              },
+            ),
+          ),),
+
+        ],),
+        ),
+      );
+     }
 }

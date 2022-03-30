@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:map_one_interface/backendCalls.dart';
 import 'package:map_one_interface/main.dart';
 import 'package:http_requests/http_requests.dart';
 import 'dart:math';
@@ -179,7 +178,6 @@ class _userState extends State<user>
                           fontWeight: FontWeight.w300
                       ),))
               ),
-
               Card(
                   margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
                   elevation: 2.0,
@@ -203,7 +201,6 @@ class _userState extends State<user>
                       Expanded(
                         child: Column(
                           children: [
-
                           ],
                         ),
                       ),
@@ -220,12 +217,12 @@ class _userState extends State<user>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: null,
-        tooltip: 'This page allows the user to make changes to their Mapone '
-            'account as well. It also allows the user to export or view their search'
-            'history ',
+        tooltip: 'Account management',
 
         child: Icon(Icons.info),
       ),
+
+
 
     );}
 

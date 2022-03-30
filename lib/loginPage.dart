@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:map_one_interface/backendCalls.dart';
 import 'package:map_one_interface/main.dart';
 import 'package:http_requests/http_requests.dart';
 import 'dart:math';
@@ -180,12 +179,13 @@ class _loginState extends State<login>
             Card(
                 margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
                 elevation: 2.0,
+
                 child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
                     child: Text("Create Account",style: TextStyle(
                         letterSpacing: 2.0,
                         fontWeight: FontWeight.w300
-                    ),))
+                    ),)),
             ),
             SizedBox(
               height: 15,
