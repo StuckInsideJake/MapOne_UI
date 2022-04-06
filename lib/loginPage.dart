@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:map_one_interface/createaccount.dart';
 import 'package:map_one_interface/main.dart';
-import 'package:http_requests/http_requests.dart';
 import 'dart:math';
+import 'package:http/http.dart' as http;
+
+import 'login.dart';
 
 class login extends StatefulWidget
 {
@@ -34,6 +37,42 @@ class _loginState extends State<login>
     returnStr = arr[randomInt];
 
     return returnStr;
+  }
+  GetEmailValue(_emController)
+  {
+
+  }
+
+  GetPasswordValue()
+  {
+
+  }
+
+  // Function: createUser
+  // Approach: takes in username/email and password as a string and passes it into
+  //get request
+  Future createUser(String email, String password)
+  async
+  {
+    // output flag
+    bool testFlg = true;
+
+    int responseCode = 0;
+
+    // get request
+    var response =
+    await http.get(
+        Uri.parse("https://mapone-api.herokuapp.com/user/?action=0&email_address=${email}&password=${password}"));
+
+    responseCode = response.statusCode;
+
+    if(testFlg == true)
+    {
+      print(responseCode);
+    }
+
+
+    return responseCode;
   }
 
   @override
@@ -155,28 +194,53 @@ class _loginState extends State<login>
               height: 10,
             ),
 
-            Card(
-                margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
-                elevation: 2.0,
-                child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
-                    child: Text("Login as Guest",style: TextStyle(
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w300
-                    ),))
+            InkWell(
+              onTap: ()
+              {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>MapOne()),);
+              },
+
+              child:
+              Card(
+                  margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
+                  elevation: 2.0,
+                  child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
+                      child: Text("Login as Guest",style: TextStyle(
+                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.w300
+                      ),))
+              ),
+
             ),
-            Card(
+            InkWell(
+              onTap: ()
+              {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>loginPane()));
+              },
+              child: Card(
                 margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
                 elevation: 2.0,
+
                 child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
-                    child: Text("Login with Existing Account",style: TextStyle(
+                    child: Text("Login with account",style: TextStyle(
                         letterSpacing: 2.0,
                         fontWeight: FontWeight.w300
-                    ),))
+                    ),)),
+              ),
             ),
 
-            Card(
+            InkWell(
+              onTap: ()
+              {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>createAcc()));
+              },
+              child:
+              Card(
                 margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
                 elevation: 2.0,
 
@@ -186,7 +250,9 @@ class _loginState extends State<login>
                         letterSpacing: 2.0,
                         fontWeight: FontWeight.w300
                     ),)),
+              ),
             ),
+
             SizedBox(
               height: 15,
             ),
@@ -204,6 +270,4 @@ class _loginState extends State<login>
 
     );}
 
-
 }
-

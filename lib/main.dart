@@ -1,13 +1,18 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:async_builder/async_builder.dart';
+import 'package:map_one_interface/mainpage.dart';
+import 'package:map_one_interface/queriedPage.dart';
 import 'package:map_one_interface/user.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'createaccount.dart';
 import 'entry.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'login.dart';
 import 'loginPage.dart';
 
 
@@ -19,12 +24,24 @@ Widget Bar = const Text(" MapOne ");
 
 List<String> logger = [];
 
+var photoArr = ['assets/images/curiosity.jpeg', 'assets/images/venus.jpeg',
+  'assets/images/mars.jpeg', 'assets/images/titan.jpeg',
+  'assets/images/uranus.jpeg',
+];
 
+// function: randomly selects a planetImage from photoArr
+// approach: randomly selects an index no larger than the length
+// of the arr
+randomlySelectPlanetImage(arr) {
+  String returnStr;
+  int maxInt = arr.length;
+  int randomInt = Random().nextInt(maxInt);
 
-// setting list to a string then spliting it into a new list on the main to call
-// overflows for some reason
-  // String entryIdArr = backEndCalls(entryIdArr) as String;
- //List EntryIdArr = entryIdArr.split(',');
+  returnStr = arr[randomInt];
+
+  return returnStr;
+}
+
 
 
 final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
@@ -32,6 +49,7 @@ final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
 
     void downloadFile(String fileName, String content)
            {
+
             html.AnchorElement anchorElement =  new html.AnchorElement(href: fileName);
 
             anchorElement.appendText(content);
@@ -42,24 +60,29 @@ final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
 
             anchorElement.click();
            }
-    Future<EntryDataGridSource> getEntryDataSource() async
-        {
-         var entryList = await getApiEntries();
-          return EntryDataGridSource(entryList);
 
-        }
+    Future<EntryDataGridSource> getEntryDataSource() async
+          {
+           var entryList = await getApiEntries();
+
+           return EntryDataGridSource(entryList);
+          }
+
+
     List<GridColumn> getColumns()
-      {
-        List<GridColumn> columns;
-       columns = <GridColumn>[
-         GridColumn(columnName: "Entry ID",
+         {
+           List<GridColumn> columns;
+           columns = <GridColumn>[
+           GridColumn(columnName: "Entry ID",
            width: 70,
-           label: Container(
+           label:
+           Container(
                padding: EdgeInsets.all(8),
                alignment: Alignment.center,
                child: Text("Entry ID",
                    overflow: TextOverflow.clip, softWrap: true )
            ),
+
          ),
          GridColumn(columnName: "Body ",
            width: 70,
@@ -85,15 +108,15 @@ final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
                padding: EdgeInsets.all(8),
                alignment: Alignment.center,
                child: Text("Publication Date",
-                   overflow: TextOverflow.clip, softWrap: true )
+                   overflow: TextOverflow.visible, softWrap: true )
            ),
          ),
-         GridColumn(columnName: "Author(s)",
+         GridColumn(columnName: "Author",
            width: 70,
            label: Container(
                padding: EdgeInsets.all(8),
                alignment: Alignment.center,
-               child: Text("Author(s)",
+               child: Text("Author",
                    overflow: TextOverflow.clip, softWrap: true )
            ),
          ),
@@ -200,7 +223,6 @@ final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
            ] );
          }
 
-
        // allows row access
        List<DataGridRow> get rows => dataGridRows;
 
@@ -257,126 +279,221 @@ class MapOneHomePage extends StatefulWidget {
 
 }
 
-  class _MapOneHomePageState extends State<MapOneHomePage> {
+  class _MapOneHomePageState extends State<MapOneHomePage>
+
+  {
 
   @override
   Widget build(BuildContext context)
      {
-       // allows selection of text data populated from the api
-      final DataGridController _dataGridController = DataGridController();
+       TextEditingController _searchController = TextEditingController();
+       String searchKW;
 
+       return Scaffold(
+         appBar: AppBar(
+           title: Bar,
+           automaticallyImplyLeading: false,
+           actions: [
+             IconButton(
+               onPressed: () {
+                 setState(() {
 
-      return SafeArea(child:
+                   if(SearchIcon.icon == Icons.search)
+                   {
+                         SearchIcon = const Icon(Icons.cancel);
+                         Bar = const ListTile(
+                         leading: Icon(
+                             Icons.search,
+                             color: Colors.white,
+                             size: 28));
+                         TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                              hintText: 'type in journal name...',
+                              hintStyle: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontStyle: FontStyle.italic)));
 
-        Scaffold( appBar:
-        AppBar(
-          title: Bar,
-          automaticallyImplyLeading: false,
-          actions:
-          [
-            IconButton( icon: SearchIcon,
-            onPressed: () {
-              setState(() {
-                if(SearchIcon.icon == Icons.search)
-                  {
-                   SearchIcon = const Icon(Icons.cancel);
-                   Bar = const ListTile(leading:
-                   Icon(
-                     Icons.search,
-                     color: Colors.white,
-                     size: 28
-                   ));
-                  }
-                else
-                  {
-                   SearchIcon = const Icon(Icons.search);
-                   Bar = const Text("Search");
-                  }
-              });
-        } ),
-            // button for user page
-            IconButton( icon: Icon(Icons.face),
-              onPressed: (){
-               setState(() {
+                         searchKW = _searchController.text;
+
+                         if(searchKW != null)
+                           {
+                            Navigator.pop(context);
+                            Navigator.push(context, MaterialPageRoute(builder:
+                            (context) => query(searchKW)
+                            ));
+                           }
+
+                   }
+                   else
+                   {
+                     SearchIcon = const Icon(Icons.search);
+                     Bar = const Text("Enter your query");
+                   }
+                 });
+               },
+               icon: SearchIcon,
+             ),
+             IconButton(
+               onPressed:
+                   ()
+               {
+                 const MaterialBanner(
+                   padding: EdgeInsets.all(20),
+                   content: Text(''),
+                   leading: Icon(Icons.agriculture_outlined),
+                   backgroundColor: Colors.green,
+                   actions: <Widget>[
+                     TextButton(
+                       onPressed: null,
+                       child: Text('DISMISS'),
+                     ),
+                   ],
+                 );
+               },
+               icon: FaceIcon,
+             ),
+             IconButton(
+               onPressed:
+                   ()
+               {
+                 // in order to change view, first the current
+                 // rendered context must be popped and then the
+                 // new one must be pushed onto the build stack
                  Navigator.pop(context);
                  Navigator.push(context, MaterialPageRoute(builder:
-                     (context) => user() ));
-               });
-              },
-          ),
-           IconButton(
-               icon: Icon(Icons.home),
-               onPressed: (){
-                 setState(() {
+                     (context) => MapOne() ));
+
+               },
+               icon:HomeIcon,
+             ),
+             IconButton( icon: Icon(Icons.vpn_key_outlined),
+               onPressed:
+                   ()
+               {
+                 // in order to change view, first the current
+                 // rendered context must be popped and then the
+                 // new one must be pushed onto the build stack
+                 Navigator.pop(context);
+                 Navigator.push(context, MaterialPageRoute(builder:
+                     (context) => login() ));
+
+               },
+
+             ),
+
+
+           ], // Actions
+           centerTitle: true,
+         ),
+         body: SafeArea(
+           child: Column(
+             children: [
+               Container(
+                 decoration: BoxDecoration(
+                     image: DecorationImage(
+                         image: AssetImage(randomlySelectPlanetImage(photoArr)),
+                         fit: BoxFit.fitWidth
+                     )
+                 ),
+                 child: Container(
+                   width: double.infinity,
+                   height: 200,
+                   child: Container(
+                     alignment: Alignment(0.0,2.5),
+                   ),
+                 ),
+               ),
+               SizedBox(
+                 height: 60,
+               ),
+               SizedBox(
+                 height: 10,
+               ),
+
+               SizedBox(
+                 height: 10,
+               ),
+
+               InkWell(
+                 onTap: ()
+                 {
                    Navigator.pop(context);
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => MapOne() ));
-                 });
-               }
+                   Navigator.push(context, MaterialPageRoute(builder: (context) =>mainpage()));
+                 },
+
+                 child:
+                 Card(
+                     margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
+                     elevation: 2.0,
+                     child: Padding(
+                         padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
+                         child: Text("Login as Guest",style: TextStyle(
+                             letterSpacing: 2.0,
+                             fontWeight: FontWeight.w300
+                         ),))
+                 ),
+
+               ),
+               InkWell(
+                 onTap: ()
+                 {
+                   Navigator.pop(context);
+                   Navigator.push(context, MaterialPageRoute(builder: (context) =>loginPane()));
+                 },
+                 child: Card(
+                   margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
+                   elevation: 2.0,
+
+                   child: Padding(
+                       padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
+                       child: Text("Login with account",style: TextStyle(
+                           letterSpacing: 2.0,
+                           fontWeight: FontWeight.w300
+                       ),)),
+                 ),
+               ),
+               InkWell(
+                 onTap: ()
+                 {
+                   Navigator.pop(context);
+                   Navigator.push(context, MaterialPageRoute(builder: (context) =>createAcc()));
+                 },
+                 child:
+                 Card(
+                   margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
+                   elevation: 2.0,
+
+                   child: Padding(
+                       padding: EdgeInsets.symmetric(vertical: 12,horizontal: 30),
+                       child: Text("Create Account",style: TextStyle(
+                           letterSpacing: 2.0,
+                           fontWeight: FontWeight.w300
+                       ),)),
+                 ),
+               ),
+
+               SizedBox(
+                 height: 15,
+               ),
+
+             ],
+             //],
            ),
-            IconButton(
-                icon: Icon(Icons.vpn_key_outlined),
-                onPressed: (){
-                  setState(() {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => login() ));
-                  });
-                }
-            ),
-          ],
+         ),
+         floatingActionButton: FloatingActionButton(
+           onPressed: null,
+           tooltip: 'Account management',
 
-        ),
+           child: Icon(Icons.info),
+         ),
 
-        body:
-        Row(mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
+       );
 
-          Column(mainAxisAlignment: MainAxisAlignment.start,
-
-          children: [
-
-            ElevatedButton(
-              child: Text('Export all Publications to csv'),
-              onPressed: () {
-
-                // verify data is not null
-                if(logger!= null)
-                  {
-                    int length = logger.length, index = 0;
-
-                    String loopStr = '';
+       }
 
 
-                    while(index < length-1)
-                      {
-                        loopStr += logger.elementAt(index);
-                        index++;
-                      }
 
-                    if(loopStr != null)
-                      {
-                        downloadFile("mapone.csv", loopStr);
-                      }
 
-                  }
-
-              }),],),
-
-          Expanded( child: FittedBox(fit: BoxFit.contain,
-            child:  FutureBuilder(
-              future: getEntryDataSource(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
-                return snapshot.hasData
-                    ? SfDataGrid(key: key ,source: snapshot.data, columns: getColumns(),
-                  selectionMode: SelectionMode.single,
-                )
-                    : Center(child: CircularProgressIndicator(strokeWidth: 3,));
-              },
-            ),
-          ),),
-
-        ],),
-        ),
-      );
      }
-}
