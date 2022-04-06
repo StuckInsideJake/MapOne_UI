@@ -5,6 +5,7 @@ import 'package:map_one_interface/main.dart';
 import 'package:http_requests/http_requests.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'package:map_one_interface/mainpage.dart';
 
 import 'loginPage.dart';
 
@@ -170,7 +171,7 @@ class _createAccState extends State<loginPane> {
 
                     Navigator.pop(context);
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MapOne()));
+                        MaterialPageRoute(builder: (context) => mainpage()));
                   }
 
                 },

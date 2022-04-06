@@ -493,7 +493,4 @@ class MapOneHomePage extends StatefulWidget {
 
        }
 
-
-
-
      }
