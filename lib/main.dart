@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:async_builder/async_builder.dart';
+import 'package:map_one_interface/getquery.dart';
 import 'package:map_one_interface/mainpage.dart';
 import 'package:map_one_interface/queriedPage.dart';
 import 'package:map_one_interface/user.dart';
@@ -53,8 +54,6 @@ final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
             html.AnchorElement anchorElement =  new html.AnchorElement(href: fileName);
 
             anchorElement.appendText(content);
-
-
 
             anchorElement.download = fileName;
 
@@ -321,7 +320,7 @@ class MapOneHomePage extends StatefulWidget {
                            {
                             Navigator.pop(context);
                             Navigator.push(context, MaterialPageRoute(builder:
-                            (context) => query(searchKW)
+                            (context) => queryPane()
                             ));
                            }
 
@@ -378,12 +377,8 @@ class MapOneHomePage extends StatefulWidget {
                  Navigator.pop(context);
                  Navigator.push(context, MaterialPageRoute(builder:
                      (context) => login() ));
-
                },
-
              ),
-
-
            ], // Actions
            centerTitle: true,
          ),

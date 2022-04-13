@@ -1,30 +1,39 @@
 import 'dart:convert';
-import 'package:async_builder/async_builder.dart';
-import 'package:flutter/material.dart';
-import 'package:map_one_interface/main.dart';
-import 'package:http_requests/http_requests.dart';
+import 'dart:html';
 import 'dart:math';
+import 'queriedPage.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:map_one_interface/mainpage.dart';
-
 import 'loginPage.dart';
+import 'main.dart';
+import 'mainpage.dart';
 
-class loginPane extends StatefulWidget
+class queryPane extends StatefulWidget
 {
 
   // constructor
-  loginPane();
+  queryPane();
 
-  _createAccState createState() => _createAccState();
+  _queryPageState createState() => _queryPageState();
 
 
 }
 
-class _createAccState extends State<loginPane> {
+class _queryPageState extends State<queryPane> {
   var photoArr = ['assets/images/curiosity.jpeg', 'assets/images/venus.jpeg',
     'assets/images/mars.jpeg', 'assets/images/titan.jpeg',
     'assets/images/uranus.jpeg',
   ];
+
+  // function: validateQuery()
+  // approach: takes in keyword, and gets response code from it.
+  Future validateQuery(String keyword)
+  async
+  {
+    var response = await http.get(Uri.parse("https://mapone-api.herokuapp.com/entry/?action=1&keyword=${keyword}"));
+
+    return response.statusCode;
+  }
 
 
   // function: randomly selects a planetImage from photoArr
@@ -71,20 +80,20 @@ class _createAccState extends State<loginPane> {
   // Fetches email
   //
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     // allows the system to fetch the inputted text values
-    TextEditingController _emailController = TextEditingController();
-    TextEditingController _passwordController = TextEditingController();
+    TextEditingController _queryController = TextEditingController();
 
     return Scaffold(
         appBar: AppBar(
           title: Bar,
           automaticallyImplyLeading: false,
           actions: [
-
             IconButton(
               onPressed:
-                  () {
+                  ()
+              {
                 //in order to change view, first the current
                 // rendered context must be popped and then the
                 // new one must be pushed onto the build stack
@@ -108,9 +117,7 @@ class _createAccState extends State<loginPane> {
           centerTitle: true,
         ),
         body: SafeArea(
-
           child: Column(
-
             children: [
               Container(
                 decoration: BoxDecoration(
@@ -127,54 +134,44 @@ class _createAccState extends State<loginPane> {
                   ),
                 ),
               ),
-              Container(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
-                  child: TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "Please enter Your email"
-                    ),),),
 
-              ),
               Container(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
                     child: TextField(
-                      controller: _passwordController,
-                      obscureText: true,
+                      controller: _queryController,
+                      obscureText: false,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: "Please enter your password",
+                        labelText: "Please enter your query",
                       ),),)
               ),
-
               RaisedButton(
                 onPressed: ()
                 async {
-                  String email, password;
+                  String queryKW;
                   var responseCode;
-                  email = _emailController.text;
-                  password = _passwordController.text;
+                  queryKW = _queryController.text;
 
-                  responseCode = await loginUser(email, password);
+                  responseCode = await validateQuery(queryKW);
 
                   print(responseCode);
 
+
+                  // validate request as successful prior to
+                  // pushing requested searches into a table.
                   if(responseCode == 200)
                   {
-                    print("User successfully logged in!!");
+                    print("Valid query!");
                     Navigator.pop(context);
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => mainpage()));
+                        MaterialPageRoute(builder: (context) => query(queryKW)));
                   }
                 },
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
-                  child: Text("Login"),
+                  child: Text("Search"),
                 ),
               ),
             ],

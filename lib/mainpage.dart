@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:html';
 import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:map_one_interface/getquery.dart';
 import 'package:map_one_interface/main.dart';
 import 'package:http_requests/http_requests.dart';
 import 'dart:math';
@@ -263,19 +264,24 @@ class _mainpageState extends State<mainpage>
                      Navigator.pop(context);
                      Navigator.push(context, MaterialPageRoute(builder: (context) => login()));
                    });
-                 }
+                 },
+             ),
+             IconButton(
+               icon: Icon(Icons.search),
+               onPressed: (){
+                 setState(() {
+                   Navigator.pop(context);
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => queryPane()));
+                 });
+               },
              ),
            ],
-
          ),
-
            body:
            Row(mainAxisAlignment: MainAxisAlignment.center,
              mainAxisSize: MainAxisSize.max,
              children: [
-
                Column(
-
                  mainAxisAlignment: MainAxisAlignment.start,
                  children: [
                    ElevatedButton(
@@ -317,7 +323,6 @@ class _mainpageState extends State<mainpage>
              ],),
          ),
        );
-
      }
 
    }

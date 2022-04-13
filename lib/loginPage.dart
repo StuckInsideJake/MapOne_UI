@@ -6,6 +6,7 @@ import 'package:map_one_interface/main.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 
+import 'getquery.dart';
 import 'login.dart';
 
 class login extends StatefulWidget
@@ -156,9 +157,20 @@ class _loginState extends State<login>
               Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder:
                   (context) => login() ));
-
             },
 
+          ),
+          IconButton( icon: Icon(Icons.search),
+            onPressed:
+                ()
+            {
+              // in order to change view, first the current
+              // rendered context must be popped and then the
+              // new one must be pushed onto the build stack
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder:
+                  (context) => queryPane()));
+            },
           ),
 
 
@@ -200,7 +212,6 @@ class _loginState extends State<login>
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context) =>MapOne()),);
               },
-
               child:
               Card(
                   margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
