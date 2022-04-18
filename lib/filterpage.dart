@@ -1,9 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:html';
 import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:map_one_interface/getquery.dart';
 import 'package:map_one_interface/main.dart';
 import 'package:http_requests/http_requests.dart';
 import 'dart:math';
@@ -13,36 +11,66 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'entry.dart';
 import 'dart:html' as html;
 import 'getfilter.dart';
+import 'getquery.dart';
 import 'loginPage.dart';
 
-class mainpage extends StatefulWidget
-   {
-    mainpage();
-    _mainpageState createState() => _mainpageState();
+class filter extends StatefulWidget
+{
+  static String start = " ";
+  static String end = " ";
+
+  // constructor
+  // Must accept start and end dates for filter
+  filter(inStart, inEnd)
+  {
+    start =  inStart;
+    end = inEnd;
+  }
+
+  _filterState createState() => _filterState();
 
 
-   }
+}
 
-final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
+// Function: getApiEntries
+// Parameters: keyword, boolean flag
+// that determines return value
+Future filterApiEntries(String start, String end,  bool responseCodeFlag)
+async
+{
+  // get request
+  var response = await http.get(Uri.parse("https://mapone-api.herokuapp.com/entry/?action=2&first_year=${start}&second_year=${end}"));
 
+  // store
+  var decodedRes = json.decode(response.body).cast<Map<String,dynamic>>();
+
+  List<Entry> responseList = await decodedRes.map<Entry>((json)=>
+      Entry.fromJson(json)).toList();
+
+  // if responseCode flag is true return the
+  // the response code, otherwise return data
+  if(responseCodeFlag == true)
+  {
+    return response.statusCode;
+  }
+
+  return responseList;
+}
 
 void downloadFile(String fileName, String content)
 {
 
   html.AnchorElement anchorElement =  new html.AnchorElement(href: fileName);
-
   anchorElement.appendText(content);
 
-
-
   anchorElement.download = fileName;
-
   anchorElement.click();
 }
 
-Future<EntryDataGridSource> getEntryDataSource() async
+Future<EntryDataGridSource> getEntryDataSource(start, end) async
 {
-  var entryList = await getApiEntries();
+  bool getDataflag = false;
+  var entryList = await filterApiEntries(start,end, getDataflag);
 
   return EntryDataGridSource(entryList);
 }
@@ -61,6 +89,7 @@ List<GridColumn> getColumns()
           child: Text("Entry ID",
               overflow: TextOverflow.clip, softWrap: true )
       ),
+
     ),
     GridColumn(columnName: "Body ",
       width: 70,
@@ -110,23 +139,6 @@ List<GridColumn> getColumns()
   ];
   return columns;
 }
-
-// Function: getApiEntries
-Future getApiEntries()
-async
-{
-  // get request
-  var response = await http.get(Uri.parse("https://mapone-api.herokuapp.com/entry/?action=0"));
-
-  // store
-  var decodedRes = json.decode(response.body).cast<Map<String,dynamic>>();
-
-  List<Entry> responseList = await decodedRes.map<Entry>((json)=>
-      Entry.fromJson(json)).toList();
-
-  return responseList;
-}
-
 class EntryDataGridSource extends DataGridSource
 {
 
@@ -217,116 +229,120 @@ class EntryDataGridSource extends DataGridSource
       ]);
     }).toList(growable: false);
   }
-
 }
 
-class _mainpageState extends State<mainpage>
-   {
+class _filterState extends State<filter>
+{
+
+  String st = filter.start;
+  String ed = filter.end;
+
   @override
   Widget build(BuildContext context)
-     {
-       return SafeArea(
-         child:
-         Scaffold(
-           appBar:
-           AppBar(
-           title: Bar,
-           automaticallyImplyLeading: false,
-           actions:
-           [
-             // button for user page
-             IconButton( icon: Icon(Icons.face),
-               onPressed: (){
-                 setState(() {
-                   Navigator.pop(context);
-                   Navigator.push(context, MaterialPageRoute(builder:
-                       (context) => login()));
-                 });
-               },
-             ),
-             IconButton(
-               icon: Icon(Icons.filter_alt_rounded),
-               onPressed: (){
-                 setState(() {
-                   Navigator.pop(context);
-                   Navigator.push(context, MaterialPageRoute(builder:
-                       (context) => filterPane()));
-                 });
-               },
-             ),
-             IconButton(
-                 icon: Icon(Icons.home),
-                 onPressed: (){
-                   setState(() {
-                     Navigator.pop(context);
-                     Navigator.push(context, MaterialPageRoute(builder: (context) => MapOne() ));
-                   });
-                 }
-             ),
-             IconButton(
-                 icon: Icon(Icons.vpn_key_outlined),
-                 onPressed: (){
-                   setState(() {
-                     Navigator.pop(context);
-                     Navigator.push(context, MaterialPageRoute(builder: (context) => login()));
-                   });
-                 },
-             ),
-             IconButton(
-               icon: Icon(Icons.search),
-               onPressed: (){
-                 setState(() {
-                   Navigator.pop(context);
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => queryPane()));
-                 });
-               },
-             ),
-           ],
-         ),
-           body:
-           Row(mainAxisAlignment: MainAxisAlignment.center,
-             mainAxisSize: MainAxisSize.max,
-             children: [
-               Column(
-                 mainAxisAlignment: MainAxisAlignment.start,
-                 children: [
-                   ElevatedButton(
-                       child: Text('Export all Publications to csv'),
-                       onPressed: () {
-                         // verify data is not null
-                         if(logger!= null)
-                         {
-                           int length = logger.length, index = 0;
-                           String loopStr = '';
+  {
+    return SafeArea(
+      child:
+      Scaffold(
+        appBar:
+        AppBar(
+          title: Bar,
+          automaticallyImplyLeading: false,
+          actions:
+          [
+            // button for user page
+            IconButton( icon: Icon(Icons.face),
+              onPressed: (){
+                setState(() {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder:
+                      (context) => login()));
+                });
+              },
+            ),
+            IconButton(
+                icon: Icon(Icons.home),
+                onPressed: (){
+                  setState(() {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapOne() ));
+                  });
+                }
+            ),
+            IconButton(
+              icon: Icon(Icons.vpn_key_outlined),
+              onPressed: (){
+                setState(() {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => login()));
+                });
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: (){
+                setState(() {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => queryPane()));
+                });
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.filter_alt_rounded),
+              onPressed: (){
+                setState(() {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder:
+                      (context) => filterPane()));
+                });
+              },
+            ),
+          ],
 
-                           while(index < length-1)
-                           {
-                             loopStr += logger.elementAt(index);
-                             index++;
-                           }
+        ),
 
-                           if(loopStr != null)
-                           {
-                             downloadFile("mapone.csv", loopStr);
-                           }
-                         }
+        body:
+        Row(mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ElevatedButton(
+                    child: Text('Export all Publications to csv'),
+                    onPressed: () {
+                      // verify data is not null
+                      if(logger!= null)
+                      {
+                        int length = logger.length, index = 0;
+                        String loopStr = '';
 
-                       }),],),
+                        while(index < length-1)
+                        {
+                          loopStr += logger.elementAt(index);
+                          index++;
+                        }
 
-               Expanded( child: FittedBox(fit: BoxFit.contain,
-                 child:  FutureBuilder(
-                   future: getEntryDataSource(),
-                   builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
-                     return snapshot.hasData
-                         ? SfDataGrid(key: key ,source: snapshot.data, columns: getColumns(),
-                       selectionMode: SelectionMode.single,
-                     )
-                         : Center(child: CircularProgressIndicator(strokeWidth: 3,));
-                   },
-                 ),
-               ),),
-             ],),
-         ),
-       );
-     }
-   }
+                        if(loopStr != null)
+                        {
+                          downloadFile("mapone.csv", loopStr);
+                        }
+                      }
+                    }),],),
+
+            Expanded( child: FittedBox(fit: BoxFit.contain,
+              child:  FutureBuilder(
+                future: getEntryDataSource(st,ed),
+                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
+                  return snapshot.hasData
+                      ? SfDataGrid(key: key ,source: snapshot.data, columns: getColumns(),
+                    selectionMode: SelectionMode.single,
+                  )
+                      : Center(child: CircularProgressIndicator(strokeWidth: 3,));
+                },
+              ),
+            ),),
+          ],),
+      ),
+    );
+  }
+}

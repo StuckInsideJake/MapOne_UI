@@ -5,7 +5,9 @@ import 'package:map_one_interface/createaccount.dart';
 import 'package:map_one_interface/main.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'package:map_one_interface/mainpage.dart';
 
+import 'getfilter.dart';
 import 'getquery.dart';
 import 'login.dart';
 
@@ -83,56 +85,7 @@ class _loginState extends State<login>
         title: Bar,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
 
-                if(SearchIcon.icon == Icons.search)
-                {
-                  SearchIcon = const Icon(Icons.cancel);
-                  Bar = const ListTile(
-                      leading: Icon(
-                          Icons.search,
-                          color: Colors.white,
-                          size: 28));
-                  title: TextField( decoration: InputDecoration(
-                      hintText: 'type in journal name...',
-                      hintStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontStyle: FontStyle.italic)));
-                  border: InputBorder.none;
-                  style: TextStyle(color: Colors.grey);
-
-                }
-                else
-                {
-                  SearchIcon = const Icon(Icons.search);
-                  Bar = const Text("Enter your query");
-                }
-              });
-            },
-            icon: SearchIcon,
-          ),
-          IconButton(
-            onPressed:
-                ()
-            {
-              const MaterialBanner(
-                padding: EdgeInsets.all(20),
-                content: Text('Hello, I am a Material Banner'),
-                leading: Icon(Icons.agriculture_outlined),
-                backgroundColor: Colors.green,
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: null,
-                    child: Text('DISMISS'),
-                  ),
-                ],
-              );
-            },
-            icon: FaceIcon,
-          ),
           IconButton(
             onPressed:
                 ()
@@ -172,8 +125,18 @@ class _loginState extends State<login>
                   (context) => queryPane()));
             },
           ),
-
-
+          IconButton( icon: Icon(Icons.filter_alt_rounded),
+            onPressed:
+                ()
+            {
+              // in order to change view, first the current
+              // rendered context must be popped and then the
+              // new one must be pushed onto the build stack
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder:
+                  (context) => filterPane()));
+            },
+          ),
         ], // Actions
         centerTitle: true,
       ),
@@ -210,7 +173,7 @@ class _loginState extends State<login>
               onTap: ()
               {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) =>MapOne()),);
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>mainpage()));
               },
               child:
               Card(

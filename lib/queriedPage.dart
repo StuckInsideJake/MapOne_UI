@@ -10,6 +10,7 @@ import 'package:map_one_interface/user.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'entry.dart';
 import 'dart:html' as html;
+import 'getfilter.dart';
 import 'getquery.dart';
 import 'loginPage.dart';
 
@@ -249,7 +250,17 @@ class _queryState extends State<query>
                    setState(() {
                      Navigator.pop(context);
                      Navigator.push(context, MaterialPageRoute(builder:
-                         (context) => user() ));
+                         (context) => login()));
+                   });
+                 },
+               ),
+               IconButton(
+                 icon: Icon(Icons.filter_alt_rounded),
+                 onPressed: (){
+                   setState(() {
+                     Navigator.pop(context);
+                     Navigator.push(context, MaterialPageRoute(builder:
+                         (context) => filterPane()));
                    });
                  },
                ),
